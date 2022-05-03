@@ -56,17 +56,20 @@ def login_page(request):
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
-        data = JSONParser().parse(request)
-        print("request" + str(request))
-        print("body"+str(data))
-        login_result = authenticate(username=data['userid'],password=data['userpw'])
+        print("request"+str(request))
+        print("body" + str(request.body))
+        userid = request.POST.get("userid", "")
+        userpw = request.POST.get("userpw", "")
+        login_result = authenticate(username=userid,password=userpw)
         
-        print("userid = " + data['userid'] + "  userpw = "+ data['userpw'])
+        print("userid = " + userid + "  userpw = "+ userpw)
 
         if login_result:
             return HttpResponse(status=200)
         else:
             return render(request,"addresses/login.html",status=401)
+
+
         # data = JSONParser().parse(request)
         # search_name = data['name']
         
@@ -76,5 +79,5 @@ def login(request):
         #     return HttpResponse(status=200)
         # else:
         #     return HttpResponse(status=400)
-        return HttpResponse(status=200)
+    return HttpResponse(status=200)
 
