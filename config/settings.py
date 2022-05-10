@@ -90,7 +90,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR,'peoplecountfrount/build')
+            os.path.join(BASE_DIR,'result_frontend/build')
             # os.path.join(BASE_DIR, 'frontend', 'build'),
             ],
         'APP_DIRS': True,
@@ -106,7 +106,7 @@ TEMPLATES = [
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'peoplecountfrount/build/static')
+    os.path.join(BASE_DIR, 'result_frontend/build/static')
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
