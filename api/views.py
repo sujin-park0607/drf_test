@@ -20,7 +20,11 @@ def signup(request):
     serializer = UsersSerializer(data=data)
     if serializer.is_valid(): 
         serializer.save()
-        suc_tru = {'success': "True"}
+        suc_tru = {
+            'id' : data['api_id'],
+            'success': "True"
+            }
+        print(suc_tru)
         return JsonResponse(suc_tru)
     else:
         print(serializer.errors)
