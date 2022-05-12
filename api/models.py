@@ -11,5 +11,10 @@ class Users(models.Model):
         ordering = ['created']
 
 class Stay(models.Model):
-    DateTime = models.DateTimeField(auto_now_add=True)
+    place = models.TextField(null=False,blank=False)
+    dateTime = models.DateTimeField(auto_now_add=True)
     inout = models.IntegerField(null=True,blank=False)
+
+    def __str__(self):
+        return str(self.dateTime)
+

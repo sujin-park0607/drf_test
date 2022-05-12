@@ -1,16 +1,17 @@
 from calendar import month
 from rest_framework import serializers
-from .models import Users
+from .models import Users, Stay
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ['api_id','email','password']
 
-# class YearSerializer(serializers.ModelSerializer):
+#테스트 데이터를 위함
+# class StaySerializer(serializers.ModelSerializer):
 #     class Meta:
-#         model = Year
-#         fields = [ "year", "count","total" ]
+#         model = Stay
+#         fields = [ "place","inout" ]
 
 
 # class NowSerializer(serializers.ModelSerializer):
