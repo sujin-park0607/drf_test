@@ -7,11 +7,11 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         fields = ['api_id','email','password']
 
-#테스트 데이터를 위함
-# class StaySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Stay
-#         fields = [ "place","inout" ]
+# 테스트 데이터를 위함
+class StaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stay
+        fields = [ "place","inout" ]
 
 
 # class NowSerializer(serializers.ModelSerializer):

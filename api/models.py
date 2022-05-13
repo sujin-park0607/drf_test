@@ -12,7 +12,7 @@ class Users(models.Model):
 
 class Stay(models.Model):
     place = models.TextField(null=False,blank=False)
-    dateTime = models.DateTimeField(auto_now_add=True)
+    dateTime = models.DateTimeField()
     inout = models.IntegerField(null=True,blank=False)
 
     def __str__(self):
