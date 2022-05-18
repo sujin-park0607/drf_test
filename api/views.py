@@ -191,13 +191,13 @@ def subyear(request):
     return JsonResponse({'subyear':result})
 
 # 테스트 데이터를 위함
-# @api_view(['POST'])
-# @permission_classes((permissions.AllowAny,))
-# def year(request):
-#     data = JSONParser().parse(request)
-#     serializer = StaySerializer(data=data)
-#     if serializer.is_valid(): 
-#         serializer.save()
-#         print(serializer.data)
-#         return JsonResponse(serializer.data, status=201)
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def year(request):
+    data = JSONParser().parse(request)
+    serializer = StaySerializer(data=data)
+    if serializer.is_valid(): 
+        serializer.save()
+        print(serializer.data)
+        return JsonResponse(serializer.data, status=201)
     
