@@ -190,14 +190,65 @@ def subyear(request):
     result['total'] = content
     return JsonResponse({'subyear':result})
 
-# 테스트 데이터를 위함
-@api_view(['POST'])
+import json
+@api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def year(request):
-    data = JSONParser().parse(request)
-    serializer = StaySerializer(data=data)
-    if serializer.is_valid(): 
-        serializer.save()
-        print(serializer.data)
-        return JsonResponse(serializer.data, status=201)
+def jiyong(request):
+    result = {
+        "time": dict()
+    }
+    dic = {}
+    dt_list = Stay.objects.values("dateTime")
+
+    for dt in dt_list:
+        Y = str(dt['dateTime'].year)
+        M = str(dt['dateTime'].month).zfill(2)
+        D = str(dt['dateTime'].day).zfill(2)
+        h = str(dt['dateTime'].hour).zfill(2)
+        m = str(dt['dateTime'].minute).zfill(2)
+        s = str(dt['dateTime'].second).zfill(2)
+
+        try:
+            dic[Y][M][D][h] += 1
+        except KeyError:
+            try:
+                dic[Y][M][D].update({h : 1})
+                result["time"][Y][M][D].update({h : 1})
+            except KeyError:
+                try:
+                    dic[Y][M].update({D : {h : 1}})
+                    result["time"][Y][M].update({D : {h : 1}})
+                except KeyError:
+                    try:
+                        dic[Y].update({M : {D : {h : 1}}})
+                        result["time"][Y].update({M : {D : {h : 1}}})
+                    except KeyError:
+                        dic.update({Y : {M : {D : {h : 1}}}})
+                        result["time"].update({Y : {M : {D : {h : 1}}}})
+
+    for Y in dic.keys():
+        for M in dic[Y].keys():
+            for D in dic[Y][M].keys():
+                total = sum([i for i in dic[Y][M][D].values()])
+                for H, cnt in dic[Y][M][D].items():
+                    result["time"][Y][M][D] = {
+                        "time" : H,
+                        "count" : cnt,
+                        "total" : total
+                    }
+
+
+    # result = json.dumps(result, indent=2)
+    return JsonResponse(result)
+
+# 테스트 데이터를 위함
+# @api_view(['POST'])
+# @permission_classes((permissions.AllowAny,))
+# def year(request):
+#     data = JSONParser().parse(request)
+#     serializer = StaySerializer(data=data)
+#     if serializer.is_valid(): 
+#         serializer.save()
+#         print(serializer.data)
+#         return JsonResponse(serializer.data, status=201)
     
