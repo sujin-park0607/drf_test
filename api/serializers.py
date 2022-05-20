@@ -14,8 +14,3 @@ class StaySerializer(serializers.ModelSerializer):
         fields = [ "place","inout" ]
 
 
-# class NowSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Now
-#         fields = ["time","count","total"]
-

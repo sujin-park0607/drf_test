@@ -10,5 +10,4 @@ urlpatterns = [
     path('time/',views.time,name="time"),
 
     path('subyear/',views.subyear,name="subyear"),
-    path('jiyong/',views.jiyong,name="jiyong"),
 ]

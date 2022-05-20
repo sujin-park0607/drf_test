@@ -12,6 +12,9 @@ from django.db.models import Count
 
 import math
 
+from collections import defaultdict
+import json
+
 #login
 def login(request):
     data = Users.objects.all()
@@ -58,113 +61,218 @@ def signup(request):
 
 #main graph
 #year
+# @api_view(['GET'])
+# @permission_classes((permissions.AllowAny,))
+# def year(request):
+#     total = Stay.objects.all().count()
+#     year = Stay.objects.values('dateTime__year').annotate(count=Count('id')).values('dateTime__year','count')
+
+#     result = []
+#     year_list = set()
+#     for i in range(len(year)):
+#         year[i]['total'] = total
+#         year_list.add(year[i]['dateTime__year'])
+#         result.append(year[i])
+#     print(result)
+#     print(year_list)
+
+#     return JsonResponse({"year":result})
+
+# #month
+# @api_view(['GET'])
+# @permission_classes((permissions.AllowAny,))
+# def month(request):
+#     result = dict()
+
+#     total = Stay.objects.all().count()
+#     year_list = Stay.objects.all().dates('dateTime', 'year')
+
+#     for years in year_list:
+#         content = []
+#         month = Stay.objects.filter(dateTime__year = years.year).values('dateTime__month').annotate(count=Count('id')).values('dateTime__month','count')
+#         for i in range(len(month)):
+#             month[i]['total'] = total
+#             content.append(month[i])
+        
+#         result[str(years.year)] = content
+#     print(result)
+#     month = Stay.objects.values('dateTime__year').values('dateTime__month').annotate(count=Count('id')).values('dateTime__year','dateTime__month','count')
+
+#     return JsonResponse({"month":result})
+
+# #day
+# @api_view(['GET'])
+# @permission_classes((permissions.AllowAny,))
+# def day(request):
+#     result = dict()
+#     month_result = dict()
+
+#     total = Stay.objects.all().count()
+#     year_list = Stay.objects.all().dates('dateTime', 'year')
+#     month_list = Stay.objects.all().dates('dateTime', 'month')
+
+#     for years in year_list:
+#         year_content = []
+#         year_filter = Stay.objects.filter(dateTime__year = years.year)
+
+#         for months in month_list:
+#             month_content = []
+#             month_filter = year_filter.filter(dateTime__month = months.month)
+#             day = month_filter.values('dateTime__day').annotate(count=Count('id')).values('dateTime__day','count')
+            
+#             for i in range(len(day)):
+#                 day[i]['total'] = total
+#                 month_content.append(day[i])
+            
+#             month_result[str(months.month)] = month_content
+#             year_content.append(month_result)
+        
+#         result[str(years.year)] = year_content
+#     return JsonResponse({"day":result})
+
+
+# @api_view(['GET'])
+# @permission_classes((permissions.AllowAny,))
+# def time(request):
+#     result = dict()
+#     month_result = dict()
+#     day_result = dict()
+
+#     total = Stay.objects.all().count()
+#     year_list = Stay.objects.all().dates('dateTime', 'year')
+#     month_list = Stay.objects.all().dates('dateTime', 'month')
+#     day_list = Stay.objects.all().dates('dateTime','day')
+
+#     for years in year_list:
+#         year_content = []
+#         year_filter = Stay.objects.filter(dateTime__year = years.year)
+
+#         for months in month_list:
+#             month_content = []
+#             month_filter = year_filter.filter(dateTime__month = months.month)
+
+#             for days in day_list:
+#                 day_content = []
+#                 day_filter = month_filter.filter(dateTime__day = days.day)
+#                 time = day_filter.values('dateTime__time').annotate(count=Count('id')).values('dateTime__time','count')
+            
+#                 for i in range(len(time)):
+#                     time[i]['total'] = total
+#                     day_content.append(time[i])
+                
+#                 day_result[str(days.day)] = day_content
+#                 month_content.append(day_result)
+
+#             month_result[str(months.month)] = month_content
+#             year_content.append(month_result)
+                
+#         result[str(years.year)] = year_content
+#     return JsonResponse({"time":result})
+
+def getDatetimeDic():
+    df_dic = lambda: [defaultdict(df_dic)]
+    result = df_dic()
+    dt_list = Stay.objects.values("dateTime")
+
+    for dt in dt_list:
+        Y = str(dt['dateTime'].year)
+        M = str(dt['dateTime'].month).zfill(2)
+        D = str(dt['dateTime'].day).zfill(2)
+        h = str(dt['dateTime'].hour).zfill(2)
+        m = str(dt['dateTime'].minute).zfill(2)
+        s = str(dt['dateTime'].second).zfill(2)
+
+        YM = f"{Y}-{M}"
+        YMD = f"{YM}-{D}"
+
+        tmp = result[0][Y][0][YM][0][YMD]
+        if len(tmp[0].keys()) == 0:
+            result[0][Y][0][YM][0][YMD] = [{
+                "time" : h,
+                "count" : 1,
+                "total" : 1
+            }]
+        else:
+            found = False
+            for d in result[0][Y][0][YM][0][YMD]:
+                d["total"] += 1
+
+                if d["time"] == h:
+                    found = True
+            if found:
+                d["count"] += 1
+            else:
+                result[0][Y][0][YM][0][YMD].append({
+                    "time" : h,
+                    "count" : 1,
+                    "total" : result[0][Y][0][YM][0][YMD][0]["total"]
+                })
+    return result
+
+#main graph
+#year
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def year(request):
-    total = Stay.objects.all().count()
-    year = Stay.objects.values('dateTime__year').annotate(count=Count('id')).values('dateTime__year','count')
-
+    mon = json.loads(month(request._request).getvalue())["month"]
     result = []
-    year_list = set()
-    for i in range(len(year)):
-        year[i]['total'] = total
-        year_list.add(year[i]['dateTime__year'])
-        result.append(year[i])
-    print(result)
-    print(year_list)
 
-    return JsonResponse({"year":result})
+    S = sum([i[0][0]["total"] for i in mon[0].values()])
+    for k, v in mon[0].items():
+        result.append({
+            "year" : f"{k}년",
+            "count" : v[0][0]["total"],
+            "total" : S
+        })
+
+    return JsonResponse({"year" : result})
 
 #month
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def month(request):
-    result = dict()
+    result = json.loads(day(request._request).getvalue())["day"]
 
-    total = Stay.objects.all().count()
-    year_list = Stay.objects.all().dates('dateTime', 'year')
+    for Y in result[0]:
+        M = result[0][Y][0]
+        result[0][Y][0] = []
+        S = sum([i[0][0]["total"] for i in M.values()])
+        for k, v in M.items():
+            result[0][Y][0].append({
+                "month" : f"{int(k.split('-')[-1])}월",
+                "count" : v[0][0]["total"],
+                "total" : S
+            })
 
-    for years in year_list:
-        content = []
-        month = Stay.objects.filter(dateTime__year = years.year).values('dateTime__month').annotate(count=Count('id')).values('dateTime__month','count')
-        for i in range(len(month)):
-            month[i]['total'] = total
-            content.append(month[i])
-        
-        result[str(years.year)] = content
-    print(result)
-    month = Stay.objects.values('dateTime__year').values('dateTime__month').annotate(count=Count('id')).values('dateTime__year','dateTime__month','count')
-
-    return JsonResponse({"month":result})
+    return JsonResponse({"month" : result})
 
 #day
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def day(request):
-    result = dict()
-    month_result = dict()
+    result = getDatetimeDic()
 
-    total = Stay.objects.all().count()
-    year_list = Stay.objects.all().dates('dateTime', 'year')
-    month_list = Stay.objects.all().dates('dateTime', 'month')
+    for Y in result[0]:
+        for M in result[0][Y][0]:
+            D = result[0][Y][0][M][0]
+            result[0][Y][0][M][0] = []
+            S = sum([i[0]["total"] for i in D.values()])
+            for k, v in D.items():
+                result[0][Y][0][M][0].append({
+                    "day" : k,
+                    "count" : v[0]["total"],
+                    "total" : S
+                })
 
-    for years in year_list:
-        year_content = []
-        year_filter = Stay.objects.filter(dateTime__year = years.year)
-
-        for months in month_list:
-            month_content = []
-            month_filter = year_filter.filter(dateTime__month = months.month)
-            day = month_filter.values('dateTime__day').annotate(count=Count('id')).values('dateTime__day','count')
-            
-            for i in range(len(day)):
-                day[i]['total'] = total
-                month_content.append(day[i])
-            
-            month_result[str(months.month)] = month_content
-            year_content.append(month_result)
-        
-        result[str(years.year)] = year_content
-    return JsonResponse({"day":result})
-
+    return JsonResponse({"day" : result})
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def time(request):
-    result = dict()
-    month_result = dict()
-    day_result = dict()
+    result = getDatetimeDic()
 
-    total = Stay.objects.all().count()
-    year_list = Stay.objects.all().dates('dateTime', 'year')
-    month_list = Stay.objects.all().dates('dateTime', 'month')
-    day_list = Stay.objects.all().dates('dateTime','day')
+    return JsonResponse({"time" : result})
 
-    for years in year_list:
-        year_content = []
-        year_filter = Stay.objects.filter(dateTime__year = years.year)
-
-        for months in month_list:
-            month_content = []
-            month_filter = year_filter.filter(dateTime__month = months.month)
-
-            for days in day_list:
-                day_content = []
-                day_filter = month_filter.filter(dateTime__day = days.day)
-                time = day_filter.values('dateTime__time').annotate(count=Count('id')).values('dateTime__time','count')
-            
-                for i in range(len(time)):
-                    time[i]['total'] = total
-                    day_content.append(time[i])
-                
-                day_result[str(days.day)] = day_content
-                month_content.append(day_result)
-
-            month_result[str(months.month)] = month_content
-            year_content.append(month_result)
-                
-        result[str(years.year)] = year_content
-    return JsonResponse({"time":result})
 
 #sub graph
 @api_view(['GET'])
@@ -190,56 +298,7 @@ def subyear(request):
     result['total'] = content
     return JsonResponse({'subyear':result})
 
-import json
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-def jiyong(request):
-    result = {
-        "time": dict()
-    }
-    dic = {}
-    dt_list = Stay.objects.values("dateTime")
 
-    for dt in dt_list:
-        Y = str(dt['dateTime'].year)
-        M = str(dt['dateTime'].month).zfill(2)
-        D = str(dt['dateTime'].day).zfill(2)
-        h = str(dt['dateTime'].hour).zfill(2)
-        m = str(dt['dateTime'].minute).zfill(2)
-        s = str(dt['dateTime'].second).zfill(2)
-
-        try:
-            dic[Y][M][D][h] += 1
-        except KeyError:
-            try:
-                dic[Y][M][D].update({h : 1})
-                result["time"][Y][M][D].update({h : 1})
-            except KeyError:
-                try:
-                    dic[Y][M].update({D : {h : 1}})
-                    result["time"][Y][M].update({D : {h : 1}})
-                except KeyError:
-                    try:
-                        dic[Y].update({M : {D : {h : 1}}})
-                        result["time"][Y].update({M : {D : {h : 1}}})
-                    except KeyError:
-                        dic.update({Y : {M : {D : {h : 1}}}})
-                        result["time"].update({Y : {M : {D : {h : 1}}}})
-
-    for Y in dic.keys():
-        for M in dic[Y].keys():
-            for D in dic[Y][M].keys():
-                total = sum([i for i in dic[Y][M][D].values()])
-                for H, cnt in dic[Y][M][D].items():
-                    result["time"][Y][M][D] = {
-                        "time" : H,
-                        "count" : cnt,
-                        "total" : total
-                    }
-
-
-    # result = json.dumps(result, indent=2)
-    return JsonResponse(result)
 
 # 테스트 데이터를 위함
 # @api_view(['POST'])
