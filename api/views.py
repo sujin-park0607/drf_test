@@ -173,7 +173,6 @@ def getDatetimeDic():
     df_dic = lambda: [defaultdict(df_dic)]
     result = df_dic()
     dt_list = Stay.objects.values("dateTime")
-
     for dt in dt_list:
         Y = str(dt['dateTime'].year)
         M = str(dt['dateTime'].month).zfill(2)
@@ -185,7 +184,12 @@ def getDatetimeDic():
         YM = f"{Y}-{M}"
         YMD = f"{YM}-{D}"
 
+        # print(f"result : {result}")
+        # print("\n")
+        
         tmp = result[0][Y][0][YM][0][YMD]
+
+        # 해당 일에 모든 시간이 없을 때, 아예 처음
         if len(tmp[0].keys()) == 0:
             result[0][Y][0][YM][0][YMD] = [{
                 "time" : h,
@@ -194,13 +198,20 @@ def getDatetimeDic():
             }]
         else:
             found = False
+
+            # 일단 모든 시를 total 1씩 증가
             for d in result[0][Y][0][YM][0][YMD]:
                 d["total"] += 1
 
+                #만약 현재 넣을 시가 있으면
                 if d["time"] == h:
                     found = True
+
+            # 만약 현재 넣을 시가 있으면 카운트만 증가
             if found:
                 d["count"] += 1
+
+            # 현재 넣을 시가 없으면 새로 추가
             else:
                 result[0][Y][0][YM][0][YMD].append({
                     "time" : h,
@@ -275,39 +286,89 @@ def time(request):
 
 
 #sub graph
+#subyear
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def subyear(request):
-    result = dict()
-    percent = list()
-    num = list()
-    content = list()
+    mon = json.loads(month(request._request).getvalue())["month"]
 
-    total = Stay.objects.all().count()
-    year_num = Stay.objects.values('dateTime__year').annotate(count=Count('id')).values('dateTime__year','count')
-    year_percent = Stay.objects.values('dateTime__year').annotate(count=Count('id')).values('dateTime__year','count')
+    S = sum([i[0][0]["total"] for i in mon[0].values()])
+    total = []
+    total.append( [
+        {
+            "name" : f"{k}년",
+            "value" : round(v[0][0]["total"]/S * 100),
+        }
+        for k, v in mon[0].items()
+    ])
 
-    for i in range(len(year_percent)):
-        year_percent[i]['count'] = round(year_percent[i]['count']/total * 100)
-        percent.append(year_percent[i])
-        num.append(year_num[i])
+    total.append([
+        {
+            "name" : f"{k}년",
+            "value" : v[0][0]["total"],
+        }
+        for k, v in mon[0].items()
+    ])
+
+    return JsonResponse({"subyear" : total})
+
+
+#submonth
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def submonth(request):
+    result = json.loads(day(request._request).getvalue())["day"]
+
+    for Y in result[0]:
+        M = result[0][Y][0]
+        result[0][Y][0] = []
+        S = sum([i[0][0]["total"] for i in M.values()])
+
+
+        for k, v in M.items():
+            result[0][Y][0].append({
+                "month" : f"{int(k.split('-')[-1])}월",
+                "value" : round(v[0][0]["total"]/S * 100),
+            })
     
-    content.append(percent)
-    content.append(num)
-    
-    result['total'] = content
-    return JsonResponse({'subyear':result})
+    # for Y in result[0]:
+    #     M = result[0][Y][0]
+    #     result[0][Y][0] = []
+    #     S = sum([i[0][0]["total"] for i in M.values()])
+    #     total = []
+
+    #     for k, v in M.items():
+    #         result[0][Y][0].append({
+    #             "month" : f"{int(k.split('-')[-1])}월",
+    #             "value" : v[0][0]["total"],
+    #         })
+        # total.append( [
+        #     {
+        #         "name" : f"{int(k.split('-')[-1])}월",
+        #         "value" : round(v[0][0]["total"]/S * 100),
+        #     }
+        #     for k, v in M.items()
+        # ])
+
+        # total.append([
+        #     {
+        #         "name" : f"{int(k.split('-')[-1])}월",
+        #         "value" : v[0][0]["total"],
+        #     }
+        #     for k, v in M.items()
+        # ])
+    return JsonResponse({"submonth" : result})
 
 
 
-# 테스트 데이터를 위함
-# @api_view(['POST'])
-# @permission_classes((permissions.AllowAny,))
-# def year(request):
-#     data = JSONParser().parse(request)
-#     serializer = StaySerializer(data=data)
-#     if serializer.is_valid(): 
-#         serializer.save()
-#         print(serializer.data)
-#         return JsonResponse(serializer.data, status=201)
+#테스트 데이터를 위함
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def test_data(request):
+    data = JSONParser().parse(request)
+    serializer = StaySerializer(data=data)
+    if serializer.is_valid(): 
+        serializer.save()
+        print(serializer.data)
+        return JsonResponse(serializer.data, status=201)
     
