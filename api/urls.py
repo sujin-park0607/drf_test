@@ -8,6 +8,7 @@ urlpatterns = [
     path('month/',views.month,name="month"),
     path('day/',views.day,name="day"),
     path('time/',views.time,name="time"),
+    path('now/',views.now,name="now"),
 
     path('subyear/',views.subyear,name="subyear"),
     path('submonth/',views.submonth,name="submonth"),

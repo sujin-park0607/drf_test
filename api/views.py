@@ -10,6 +10,7 @@ from .models import Users,Stay
 import cv2
 from collections import defaultdict
 import json
+from datetime import datetime, timedelta
 
 # from VideoStreaming import VideoStreaming
 
@@ -153,7 +154,6 @@ def day(request):
 @permission_classes((permissions.AllowAny,))
 def time(request):
     result = getDatetimeDic()
-
     return JsonResponse({"time" : result})
 
 
@@ -220,6 +220,26 @@ def submonth(request):
 
     return JsonResponse({"submonth" : result})
         
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def now(request):
+    now = list()
+    total = 0
+    for i in range(24):
+        current = datetime.now()
+        hour_nac = Stay.objects.filter(dateTime__year=current.year, dateTime__month=current.month, dateTime__day=current.day, dateTime__hour = i)
+        count = hour_nac.filter(inout=1).count()
+        total += count
+
+        now.append({
+            "time" : i,
+            "count" : count,
+            "total": total 
+        })  
+    
+    return JsonResponse({"now" : now})
+
 
 #subday
 @api_view(['GET'])
