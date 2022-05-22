@@ -191,36 +191,126 @@ def subyear(request):
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def submonth(request):
-    result = json.loads(subyear(request._request).getvalue())["subyear"][0]["total"][1]
-    years = ['2020','2021','2022']
-    print(result)
+    mon = json.loads(month(request._request).getvalue())["month"]
+    years = [2020,2021,2022]
+    result = dict()
+    cnt = 0
 
+    content = [[[],[]] for i in range(len(years))]
     for year in years:
-        for i in range(len(result)):
-            print(int(result[i]['name'][:-1]))
-        
+        total_sum = 0
+        for k,v in mon[0].items():
+            if int(k) == year or int(k) == year-1:
+                total_sum += v[0][0]["total"]
+        print(total_sum)
+        for k,v in mon[0].items():
+            if int(k) == year or int(k) == year-1:
+                content[cnt][0].append({
+                    "name" : f"{k}년",
+                    "value" : v[0][0]["total"]
+                })
 
-    
-
-    
+                content[cnt][1].append({
+                    "name" : f"{k}년",
+                    "value" : round(v[0][0]["total"]/total_sum * 100)
+                })
+  
+        result[year] = content[cnt]
+        cnt += 1
 
     return JsonResponse({"submonth" : result})
+        
 
-# def month(request):
-#     result = json.loads(day(request._request).getvalue())["day"]
+#subday
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def subday(request):
+    result = json.loads(day(request._request).getvalue())["day"]
+    months = [i for i in range(1,13)]
+    result1 = dict()
+    result2 = dict()
+    cnt = 0
+    
+    
+    for Y in result[0]:
+        M = result[0][Y][0]
+        
+        content = [[[],[]] for _ in range(len(months))]
+        for month in M:
+            month_num = int(month[-2:])
+            total_sum = 0
 
-#     for Y in result[0]:
-#         M = result[0][Y][0]
-#         result[0][Y][0] = []
-#         S = sum([i[0][0]["total"] for i in M.values()])
-#         for k, v in M.items():
-#             result[0][Y][0].append({
-#                 "month" : f"{int(k.split('-')[-1])}월",
-#                 "count" : v[0][0]["total"],
-#                 "total" : S
-#             })
+            for k,v in M.items():
+                if int(k[-2:]) == month_num or int(k[-2:]) == month_num-1:
+                    total_sum += v[0][0]["total"]
 
-#     return JsonResponse({"month" : result})
+            for k,v in M.items():
+                if int(k[-2:]) == month_num or int(k[-2:]) == month_num-1:
+                    content[cnt][0].append({
+                        "name" : f"{month[-2:]}",
+                        "value" : v[0][0]["total"]
+                    })
+
+                    content[cnt][1].append({
+                        "name" : f"{month[-2:]}",
+                        "value" : round(v[0][0]["total"]/total_sum * 100)
+                    })
+            result1[month[-2:]] = content[cnt]
+            cnt += 1
+            print(result1)
+            
+        result2[Y] = [result1]
+
+    return JsonResponse({"subday" : [result2]})
+
+#subtime
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def subtime(request):
+    result = getDatetimeDic()
+    days = [i for i in range(1,31)]
+    result1 = dict()
+    result2 = dict()
+    result3 = dict()
+    cnt = 0
+    
+    
+    for Y in result[0]:
+        for M in result[0][Y][0]:
+            D = result[0][Y][0][M][0]
+
+            content = [[[],[]] for _ in range(len(days))]
+            for day in D:
+                day_num = int(day[-2:])
+                total_sum = 0
+        
+                for k,v in D.items():
+                    if int(k[-2:]) == day_num or int(k[-2:]) == day_num-1:
+                        total_sum += v[0]["total"]
+
+                for k,v in D.items():
+                    if int(k[-2:]) == day_num or int(k[-2:]) == day_num-1:
+                        content[cnt][0].append({
+                            "name" : f"{day[-2:]}일",
+                            "value" : v[0]["total"]
+                        })
+
+                        content[cnt][1].append({
+                            "name" : f"{day[-2:]}일",
+                            "value" : round(v[0]["total"]/total_sum * 100)
+                        })
+                
+                result1[day[-2:]] = content[cnt]
+                cnt += 1
+                
+            result2[M[-2:]] = [result1]
+
+        result3[Y] = [result2]
+
+    return JsonResponse({"subtime" : result3})
+
+
+    
 
 
 

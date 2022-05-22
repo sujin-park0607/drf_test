@@ -11,8 +11,8 @@ urlpatterns = [
 
     path('subyear/',views.subyear,name="subyear"),
     path('submonth/',views.submonth,name="submonth"),
-    # path('subday/',views.subday,name="subday"),
-    # path('subtime/',views.subtime,name="subtime"),
+    path('subday/',views.subday,name="subday"),
+    path('subtime/',views.subtime,name="subtime"),
 
     path('test_data/',views.test_data,name="test_data"),
 ]
