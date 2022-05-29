@@ -11,6 +11,7 @@ import cv2
 from collections import defaultdict
 import json
 from datetime import datetime, timedelta
+import datetime
 
 # from VideoStreaming import VideoStreaming
 
@@ -330,6 +331,63 @@ def subtime(request):
     return JsonResponse({"subtime" : result3})
 
 
+
+#subnow
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def subnow(request):
+    now = list()
+    current_total = 0
+    before_total = 0
+
+    current = datetime.datetime.now()
+    current_day = Stay.objects.filter(dateTime__year=current.year, dateTime__month=current.month, dateTime__day=current.day)
+    before=datetime.datetime.now()-datetime.timedelta(days=1)
+    before_day = Stay.objects.filter(dateTime__year=before.year, dateTime__month=before.month, dateTime__day=before.day)
+
+
+    before_count = before_day.filter(inout=1).count()
+    current_count = current_day.filter(inout=1).count()
+
+    current_total += current_count
+    before_total += before_count
+
+    total = current_total + before_total
+
+    now.append(
+    [{
+        "name" : "Yesterday",
+        "value" : before_total, 
+    },
+    {
+        "name" : "Today",
+        "value" : current_total, 
+    }]),
+ 
+
+    if before_total != 0 and current_total != 0:
+        now.append(
+        [{
+            "name" : "Yesterday",
+            "value" : round(before_total/total * 100), 
+        },
+        {
+            "name" : "Today",
+            "value" : round(current_total/total * 100), 
+        }])
+    else:
+        now.append(
+        [{
+            "name" : "Yesterday",
+            "value" : 0, 
+        },
+        {
+            "name" : "Today",
+            "value" : 0, 
+        }])  
+    
+    return JsonResponse({"subnow" : now})
+
     
 
 
@@ -344,6 +402,8 @@ def test_data(request):
         serializer.save()
         print(serializer.data)
         return JsonResponse(serializer.data, status=201)
+
+
 
 
 
