@@ -6,6 +6,7 @@ from rest_framework.parsers import JSONParser
 from .serializers import UsersSerializer, StaySerializer
 
 from .models import Users,Stay
+from people_counter.opencv_counter import PeopleCounter
 
 import cv2
 from collections import defaultdict
@@ -14,6 +15,9 @@ from datetime import datetime, timedelta
 import datetime
 
 # from VideoStreaming import VideoStreaming
+# peoplecounter = PeopleCounter()
+# peoplecounter.run()
+
 
 #login
 def login(request):
@@ -33,10 +37,11 @@ def signup(request):
             'id' : data['api_id'],
             'success': "True"
             }
-        print(suc_tru)
+
         return JsonResponse(suc_tru)
-    else:
-        print(serializer.errors)
+    #error confirm
+    # else:
+    #     print(serializer.errors)
     
     # return Response(serializer.data, status=)
     suc_fal = {'success': "False"}
@@ -57,9 +62,6 @@ def getDatetimeDic():
 
         YM = f"{Y}-{M}"
         YMD = f"{YM}-{D}"
-
-        # print(f"result : {result}")
-        # print("\n")
         
         tmp = result[0][Y][0][YM][0][YMD]
 
@@ -166,7 +168,6 @@ def subyear(request):
     mon = json.loads(month(request._request).getvalue())["month"]
 
     S = sum([i[0][0]["total"] for i in mon[0].values()])
-    print(S)
     total = []
     total.append( [
         {
@@ -203,7 +204,7 @@ def submonth(request):
         for k,v in mon[0].items():
             if int(k) == year or int(k) == year-1:
                 total_sum += v[0][0]["total"]
-        print(total_sum)
+
         for k,v in mon[0].items():
             if int(k) == year or int(k) == year-1:
                 content[cnt][0].append({
@@ -228,13 +229,13 @@ def now(request):
     now = list()
     total = 0
     for i in range(24):
-        current = datetime.now()
+        current = datetime.datetime.now()
         hour_nac = Stay.objects.filter(dateTime__year=current.year, dateTime__month=current.month, dateTime__day=current.day, dateTime__hour = i)
         count = hour_nac.filter(inout=1).count()
         total += count
 
         now.append({
-            "time" : i,
+            "time" : f"{i}시",
             "count" : count,
             "total": total 
         })  
@@ -278,7 +279,6 @@ def subday(request):
                     })
             result1[month[-2:]] = content[cnt]
             cnt += 1
-            print(result1)
             
         result2[Y] = [result1]
 
@@ -356,11 +356,11 @@ def subnow(request):
 
     now.append(
     [{
-        "name" : "Yesterday",
+        "name" : f"{before.day}일",
         "value" : before_total, 
     },
     {
-        "name" : "Today",
+        "name" : f"{current.day}일",
         "value" : current_total, 
     }]),
  
@@ -368,21 +368,21 @@ def subnow(request):
     if before_total != 0 and current_total != 0:
         now.append(
         [{
-            "name" : "Yesterday",
+            "name" : f"{before.day}일",
             "value" : round(before_total/total * 100), 
         },
         {
-            "name" : "Today",
+            "name" : f"{current.day}일",
             "value" : round(current_total/total * 100), 
         }])
     else:
         now.append(
         [{
-            "name" : "Yesterday",
+            "name" : f"{before.day}일",
             "value" : 0, 
         },
         {
-            "name" : "Today",
+            "name" : f"{current.day}일",
             "value" : 0, 
         }])  
     
@@ -400,7 +400,6 @@ def test_data(request):
     serializer = StaySerializer(data=data)
     if serializer.is_valid(): 
         serializer.save()
-        print(serializer.data)
         return JsonResponse(serializer.data, status=201)
 
 

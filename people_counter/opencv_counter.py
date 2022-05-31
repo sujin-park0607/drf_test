@@ -1,5 +1,7 @@
-# import django
-# django.setup()
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wetyle_share.settings')
+import django
+django.setup()
 
 from requests import request
 import requests
@@ -7,36 +9,28 @@ from people_counter.findObjectAlgorithm.centroidtracker import CentroidTracker
 from people_counter.findObjectAlgorithm.trackableobject import TrackableObject
 from rest_framework.parsers import JSONParser
 from django.apps import AppConfig
-# from .serializers import StaySerializer
+from api.serializers import StaySerializer
 
 import numpy as np
 import os
 import time
 import dlib
 import cv2
+import json
 
 import sys
 from pathlib import Path
 from django.apps import AppConfig
  
-# import os
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wetyle_share.settings')
-# import django
-# django.setup()
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # class peopleCounter:
-class PeopleCounter(AppConfig):
+class PeopleCounter:
     name = 'api'
-
-    # def counting(self, data):
-        # data = JSONParser().parse(request)
-        # serializer = StaySerializer(data=data)
-        # if serializer.is_valid(): 
-        #     serializer.save()
 
     # def people_counter(self, prototxt, caffemodel):
     def people_counter(self,prototxt,caffemodel):
@@ -138,30 +132,12 @@ class PeopleCounter(AppConfig):
                     if not to.counted:
                         if direction < 0 and centroid[1] < int(H * 0.55):
                             totalUp += 1
-                            # data = {
-                            #     'place' : 'Seongan-gil',
-                            #     'inout' : 1
-                            # }
-                            # try:
-                            #     hi = requests.get('https://localhost:8000/count/',json=data)
-                            #     print(hi.status_code)
-                            # except:
-                            #     print('error')
-                            
-                            time.sleep(2)
-                            # self.counting(data)
-
+                            self.counting(1)
                             to.counted = True
+
                         elif direction > 0 and centroid[1] > int(H * 0.55):
                             totalDown += 1
-                            # data = {
-                            #     'place' : 'Seongan-gil',
-                            #     'inout' : 0
-                            # }
-                            # response = requests.get('https://localhost:8000/count/',json=data)
-     
-                    
-                            # self.counting(data)
+                            self.counting(0)
                             to.counted = True
                             
                 trackableObjects[objectID] = to
@@ -189,8 +165,25 @@ class PeopleCounter(AppConfig):
         #out.release()
         cap.release()
         cv2.destroyAllWindows()
+    
+    
+    def counting(self, inout):
+        request = json.dumps({
+                "place" : "Seongan-gil",
+                "inout" : inout
+                })
+        data = JSONParser().parse(request)
+        serializer = StaySerializer(data=data)
+        print('start')
+        if serializer.is_valid(): 
+            serializer.save()
+            print('성공')
         
-    def ready(self):
+    def run(self):
         prototxt = os.path.join(BASE_DIR,'people_counter','MobileNetSSD_deploy.prototxt')
         caffemodel = os.path.join(BASE_DIR,'people_counter','MobileNetSSD_deploy.caffemodel')
         self.people_counter(prototxt,caffemodel)
+
+# if __name__=='__main__':
+#     peoplecounter = PeopleCounter()
+#     peoplecounter.run()
