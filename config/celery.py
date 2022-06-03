@@ -5,7 +5,10 @@ from celery import Celery
 # Celery 모듈을 위한 Django 기본세팅
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-app = Celery('config')
+app = Celery('config',
+             broker='amqp://',
+             backend='rpc://',
+             include=['config.tasks'])
 
 
 # 여기서 문자열을 사용하는것은 작업자가가 자식 프로세스 직렬화 구성을 하지 않는것을 의미합니다.
@@ -15,7 +18,13 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Django 에 등록된 모든 task 모듈을 로드합니다.
 app.autodiscover_tasks()
 
+app.conf.update(
+    result_expires=3600,
+)
 
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
+
+if __name__ == '__main__':
+    app.start()
