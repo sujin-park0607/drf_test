@@ -1,1 +1,1 @@
-# default_app_config = 'api.broker.PeopleCounter'
+default_app_config = 'api.broker.PeopleCounter'

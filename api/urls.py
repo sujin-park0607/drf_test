@@ -15,6 +15,10 @@ urlpatterns = [
     path('subday/',views.subday,name="subday"),
     path('subtime/',views.subtime,name="subtime"),
     path('subnow/',views.subnow,name="subnow"),
-
-    path('test_data/',views.test_data,name="test_data"),
+    path('streaming/',views.streaming,name="streaming"),
+    path('getStream/',views.getStream,name="getStream"),
 ]
+
+from django.conf.urls.static import static
+from django.conf import settings
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

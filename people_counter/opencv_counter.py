@@ -1,15 +1,9 @@
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wetyle_share.settings')
-import django
-django.setup()
-
 from requests import request
-import requests
 from people_counter.findObjectAlgorithm.centroidtracker import CentroidTracker
 from people_counter.findObjectAlgorithm.trackableobject import TrackableObject
-from rest_framework.parsers import JSONParser
-from django.apps import AppConfig
-from api.serializers import StaySerializer
+# from rest_framework.parsers import JSONParser
+# from django.apps import AppConfig
+# from api.serializers import StaySerializer
 
 import numpy as np
 import os
@@ -20,7 +14,6 @@ import json
 
 import sys
 from pathlib import Path
-from django.apps import AppConfig
  
 
 
@@ -132,12 +125,12 @@ class PeopleCounter:
                     if not to.counted:
                         if direction < 0 and centroid[1] < int(H * 0.55):
                             totalUp += 1
-                            self.counting(1)
+                            # self.counting(1)
                             to.counted = True
 
                         elif direction > 0 and centroid[1] > int(H * 0.55):
                             totalDown += 1
-                            self.counting(0)
+                            # self.counting(0)
                             to.counted = True
                             
                 trackableObjects[objectID] = to
@@ -153,9 +146,10 @@ class PeopleCounter:
             for (i, (k, v)) in enumerate(info):
                 text = "{}: {}".format(k, v)
                 cv2.putText(frame, text, (10, H - ((i * 20) + 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-            
+
             #out.write(frame)
-            cv2.imshow("Frame", frame)
+            # cv2.imshow("Frame", frame)
+            cv2.imwrite(f"C:/result_streaming.png", frame)
             # cv2.imshow('Original_Frame', original_frame)
             key = cv2.waitKey(1)
             if key == ord("q"):
@@ -167,17 +161,17 @@ class PeopleCounter:
         cv2.destroyAllWindows()
     
     
-    def counting(self, inout):
-        request = json.dumps({
-                "place" : "Seongan-gil",
-                "inout" : inout
-                })
-        data = JSONParser().parse(request)
-        serializer = StaySerializer(data=data)
-        print('start')
-        if serializer.is_valid(): 
-            serializer.save()
-            print('성공')
+    # def counting(self, inout):
+    #     request = json.dumps({
+    #             "place" : "Seongan-gil",
+    #             "inout" : inout
+    #             })
+    #     data = JSONParser().parse(request)
+    #     serializer = StaySerializer(data=data)
+    #     print('start')
+    #     if serializer.is_valid(): 
+    #         serializer.save()
+    #         print('성공')
         
     def run(self):
         prototxt = os.path.join(BASE_DIR,'people_counter','MobileNetSSD_deploy.prototxt')

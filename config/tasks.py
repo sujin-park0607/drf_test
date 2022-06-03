@@ -1,20 +1,26 @@
 # Create your tasks here
-from celery import shared_task
+from .celery import app
+# from people_counter.opencv_counter import PeopleCounter
+
+@app.task
+def peoplecounter(x, y):
+    # p = PeopleCounter()
+    # p.run()
+    return 200
 
 
-@shared_task
-def add(x, y):
-    return x + y
+# if __name__ == '__main__':
+#     app.start()
 
 
-@shared_task
-def mul(x, y):
-    return x * y
+# @app.task
+# def mul(x, y):
+#     return x * y
 
 
-@shared_task
-def xsum(numbers):
-    return sum(numbers)
+# @app.task
+# def xsum(numbers):
+#     return sum(numbers)
 
 
 # @shared_task

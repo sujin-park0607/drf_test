@@ -19,10 +19,8 @@ import sys
 from pathlib import Path
 from django.apps import AppConfig
  
-# import os
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wetyle_share.settings')
-# import django
-# django.setup()
+    
+import threading
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -179,7 +177,8 @@ class PeopleCounter(AppConfig):
                 cv2.putText(frame, text, (10, H - ((i * 20) + 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             
             #out.write(frame)
-            cv2.imshow("Frame", frame)
+            cv2.imwrite("static/result_stream_img.png", frame)
+            # cv2.imshow("Frame", frame)
             # cv2.imshow('Original_Frame', original_frame)
             key = cv2.waitKey(1)
             if key == ord("q"):
@@ -189,8 +188,15 @@ class PeopleCounter(AppConfig):
         #out.release()
         cap.release()
         cv2.destroyAllWindows()
-        
+
     def ready(self):
+        print("start")
         prototxt = os.path.join(BASE_DIR,'people_counter','MobileNetSSD_deploy.prototxt')
         caffemodel = os.path.join(BASE_DIR,'people_counter','MobileNetSSD_deploy.caffemodel')
-        self.people_counter(prototxt,caffemodel)
+
+        t = threading.Thread(target=self.people_counter, args=(prototxt,caffemodel))
+        t.start()
+        # self.people_counter(prototxt,caffemodel)
+
+        print("end")
+        

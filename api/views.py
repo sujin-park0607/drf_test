@@ -1,8 +1,11 @@
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
 from rest_framework.parsers import JSONParser
+
+from api.broker import BASE_DIR
 from .serializers import UsersSerializer, StaySerializer
 
 from .models import Users,Stay
@@ -392,16 +395,22 @@ def subnow(request):
 
 
 
-#테스트 데이터를 위함
-@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def test_data(request):
-    data = JSONParser().parse(request)
-    serializer = StaySerializer(data=data)
-    if serializer.is_valid(): 
-        serializer.save()
-        return JsonResponse(serializer.data, status=201)
 
+# @api_view(['GET'])
+# @permission_classes((permissions.AllowAny,))
+def streaming(request):
+    return render(request,'streaming/streaming.html')
+
+
+def getStream(request):
+    # POST 요청일 때
+    if request.method == 'POST':
+        context = {
+            'result': f"/static/result_stream_img.png",
+        }
+        # frame = cv2.imread(f"/static/result_stream_img.png")
+        # resulkt = base64(frame)
+        return JsonResponse(context)
 
 
 
