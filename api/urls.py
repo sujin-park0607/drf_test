@@ -16,7 +16,8 @@ urlpatterns = [
     path('subtime/',views.subtime,name="subtime"),
     path('subnow/',views.subnow,name="subnow"),
     path('streaming/',views.streaming,name="streaming"),
-    path('getStream/',views.getStream,name="getStream"),
+    path('video/origin/',views.video_origin,name="video_origin"),
+    path('video/check/',views.video_check,name="video_check"),
 ]
 
 from django.conf.urls.static import static

@@ -16,6 +16,7 @@ from collections import defaultdict
 import json
 from datetime import datetime, timedelta
 import datetime
+import base64
 
 # from VideoStreaming import VideoStreaming
 # peoplecounter = PeopleCounter()
@@ -402,29 +403,46 @@ def streaming(request):
     return render(request,'streaming/streaming.html')
 
 
-def getStream(request):
-    # POST 요청일 때
-    if request.method == 'POST':
-        context = {
-            'result': f"/static/result_stream_img.png",
-        }
-        # frame = cv2.imread(f"/static/result_stream_img.png")
-        # resulkt = base64(frame)
-        return JsonResponse(context)
-
-
-
-
-# @api_view(['GET'])
-# @permission_classes((permissions.AllowAny,))
-# def video_page(request):
-
-    
-
-#     return render("")
-
-
+# def getStream(request):
+#     # POST 요청일 때
+#     if request.method == 'POST':
+#         context = {
+#             'result': f"/static/result_stream_img.png",
+#         }
+#         # frame = cv2.imread(f"/static/result_stream_img.png")
+#         # resulkt = base64(frame)
+#         return JsonResponse(context)
 
 
 # VideoStreaming
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def video_check(request):
+    # frame = cv2.imread(f"/static/result_stream_img.png")
+    # # frame.encode("base64")
+    # base64_string = base64.b64encode(frame)
+    # print(base64_string)
+    # return JsonResponse(base64_string)
+
+    with open('static/result_stream_img.png', 'rb') as img:
+        base64_string = base64.b64encode(img.read())
+    print("Success")
+    return JsonResponse(base64_string)
+
+
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def video_origin(request):
+
+    with open('static/origin_stream_img.png', 'rb') as img:
+        base64_string = base64.b64encode(img.read())
+    print("Success")
+
+    return JsonResponse(base64_string)
+
+
+
+
+
     

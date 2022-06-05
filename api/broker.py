@@ -73,12 +73,14 @@ class PeopleCounter(AppConfig):
 
         while True:
             frame = cap.read()
-            
+
             if not frame[0]:
                 break
             
             original_frame = frame[1]
             frame = frame[1]
+
+            cv2.imwrite("static/origin_stream_img.png", frame)
             frame = cv2.resize(frame, (600, 800), interpolation=cv2.INTER_AREA)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             

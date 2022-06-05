@@ -91,8 +91,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR,'templates')
-            # os.path.join(BASE_DIR,'peoplecountfrount/build')
+            # os.path.join(BASE_DIR,'templates')
+            os.path.join(BASE_DIR,'peoplecountfrount/build')
             # os.path.join(BASE_DIR, 'frontend', 'build'),
             ],
         'APP_DIRS': True,
@@ -107,9 +107,11 @@ TEMPLATES = [
     },
 ]
 
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'peoplecountfrount/build/static')
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'peoplecountfrount/build/static')
+]
+
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -171,4 +173,3 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
